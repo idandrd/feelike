@@ -65,9 +65,9 @@ module Mood
     def self.handle_input(bot, message)
       case message.text
         when "/stats"
-          avg = Mood::Database.database[:moods].avg(:value).to_f.round(2)
-          total_moods = Mood::Database.database[:moods].count
-          first_mood = Mood::Database.database[:moods].first[:time]
+          avg = Mood::Database.database[:moods].where(:chat_id => message.chat.id).avg(:value).to_f.round(2)
+          total_moods = Mood::Database.database[:moods].where(:chat_id => message.chat.id).count
+          first_mood = Mood::Database.database[:moods].where(:chat_id => message.chat.id).first[:time]
           number_of_months = (Time.now - first_mood) / 60.0 / 60.0 / 24.0 / 30.0
           average_number_of_moods = (total_moods / number_of_months) / 30.0
 
@@ -78,7 +78,7 @@ module Mood
         when "/graph"
           file = Tempfile.new("graph")
           file_path = "#{file.path}.png"
-          moods = Mood::Database.database[:moods]
+          moods = Mood::Database.database[:moods].where(:chat_id => message.chat.id)
 
           g = Gruff::Line.new
           g.title = "Your mood"
@@ -94,7 +94,7 @@ module Mood
             photo: Faraday::UploadIO.new(file_path, 'image/png')
           )
         when "/notes"
-          Mood::Database.database[:notes].each do |n|
+          Mood::Database.database[:notes].where(:chat_id => message.chat.id).each do |n|
             bot.api.send_message(chat_id: message.chat.id, text: "#{n[:time].strftime("%Y-%m-%d")}: #{n[:note]}")
           end
         when /\/note\ /

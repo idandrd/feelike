@@ -17,17 +17,21 @@ module Mood
           ]
         )
       self.perform_with_bot do |bot|
-        bot.api.send_message(
-          chat_id: self.chat_id,
-          text: message,
-          reply_markup: answers
-        )
+        for chat in Mood::Database.database[:chats].all
+          bot.api.send_message(
+            chat_id: chat[:chat_id],
+            text: message,
+            reply_markup: answers
+          )
+        end
       end
     end
 
     def self.listen
       self.perform_with_bot do |bot|
         bot.listen do |message|
+          self.add_chat_id(message.chat.id)
+
           if message.text.to_s.to_i > 0 || message.text.to_s.strip.start_with?("0")
             # As 0 is also a valid value
             rating = message.text.to_i
@@ -35,6 +39,7 @@ module Mood
             if rating >= 0 && rating <= 5
               Mood::Database.database[:moods].insert({
                 time: Time.at(message.date),
+                chat_id: message.chat.id,
                 value: rating
               })
               bot.api.send_message(chat_id: message.chat.id, text: "Got it! It's marked in the books 📚")
@@ -58,13 +63,6 @@ module Mood
     end
 
     def self.handle_input(bot, message)
-      # This is for all the trolls that add the bot to some group conversations
-      # or try to text your bot
-      if message.chat.id.to_s != self.chat_id.to_s
-        puts "Chat ID #{message.chat.id} doesn't match the provided Chat ID #{self.chat_id}"
-        return
-      end
-
       case message.text
         when "/stats"
           avg = Mood::Database.database[:moods].avg(:value).to_f.round(2)
@@ -103,16 +101,13 @@ module Mood
           note_content = message.text.split("/note ").last
           Mood::Database.database[:notes].insert({
             time: Time.at(message.date),
+            chat_id: message.chat.id,
             note: note_content
           })
           bot.api.send_message(chat_id: message.chat.id, text: "Got it! I'll forever remember this note for you 📚")
         else
           bot.api.send_message(chat_id: message.chat.id, text: "Sorry, I don't understand what you're saying, #{message.from.first_name}")
         end
-    end
-
-    def self.chat_id
-      ENV["TELEGRAM_CHAT_ID"]
     end
 
     def self.perform_with_bot
@@ -128,6 +123,14 @@ module Mood
       return @client if @client
       raise "No Telegram token provided on `TELEGRAM_TOKEN`" if token.to_s.length == 0
       @client = ::Telegram::Bot::Client.new(token)
+    end
+
+    def self.add_chat_id(chat_id)
+      begin
+        Mood::Database.database[:chats].insert(:chat_id => chat_id)
+      rescue
+        # Do nothing
+      end
     end
 
     def self.token

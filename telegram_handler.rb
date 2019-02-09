@@ -84,11 +84,12 @@ module Mood
           g.title = "Your mood"
           g.hide_legend = true
           g.no_data_message = "There is no data"
-          g.baseline_value = 0
+          g.reference_lines[:minimum]  = { :value => 0, :color => "red" }
+          g.reference_lines[:maximum]  = { :value => 5, :color => "green" }
+          # g.reference_lines[:horiz_one] = { :index => 1, :color => 'green' }
           labels_arr = moods.each_with_index.map { |m,i| [i, m[:time]] }
           puts(labels_arr.to_h)
           g.labels = labels_arr.to_h
-          # g.reference_lines[:horiz_one] = { :index => 1, :color => 'green' }
           g.data(:mood, moods.collect { |m| m[:value] })
           g.write(file_path)
 

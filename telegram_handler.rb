@@ -82,10 +82,13 @@ module Mood
 
           g = Gruff::Line.new
           g.title = "Your mood"
-          g.theme = {
-            background_colors: %w(#eeeeee #eeeeee),
-            background_direction: :top_bottom,
-          }
+          g.hide_legend = true
+          g.no_data_message = "There is no data"
+          g.baseline_value = 0
+          labels_arr = moods.each_with_index.map { |m,i| [i, m[:time]] }
+          puts(labels_arr.to_h)
+          g.labels = labels_arr.to_h
+          # g.reference_lines[:horiz_one] = { :index => 1, :color => 'green' }
           g.data(:mood, moods.collect { |m| m[:value] })
           g.write(file_path)
 

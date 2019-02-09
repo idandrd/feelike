@@ -64,17 +64,17 @@ module Mood
 
     def self.handle_input(bot, message)
       case message.text
-        when "/stats"
-          avg = Mood::Database.database[:moods].where(:chat_id => message.chat.id).avg(:value).to_f.round(2)
-          total_moods = Mood::Database.database[:moods].where(:chat_id => message.chat.id).count
-          first_mood = Mood::Database.database[:moods].where(:chat_id => message.chat.id).first[:time]
-          number_of_months = (Time.now - first_mood) / 60.0 / 60.0 / 24.0 / 30.0
-          average_number_of_moods = (total_moods / number_of_months) / 30.0
+        # when "/stats"
+        #   avg = Mood::Database.database[:moods].where(:chat_id => message.chat.id).avg(:value).to_f.round(2)
+        #   total_moods = Mood::Database.database[:moods].where(:chat_id => message.chat.id).count
+        #   first_mood = Mood::Database.database[:moods].where(:chat_id => message.chat.id).first[:time]
+        #   number_of_months = (Time.now - first_mood) / 60.0 / 60.0 / 24.0 / 30.0
+        #   average_number_of_moods = (total_moods / number_of_months) / 30.0
 
-          bot.api.send_message(chat_id: message.chat.id, text: "The average mood is: #{avg}")
-          bot.api.send_message(chat_id: message.chat.id, text: "Total tracked moods: #{total_moods}")
-          bot.api.send_message(chat_id: message.chat.id, text: "Number of months tracked: #{number_of_months.round(1)}")
-          bot.api.send_message(chat_id: message.chat.id, text: "Averaging #{average_number_of_moods.round(1)} per day")
+        #   bot.api.send_message(chat_id: message.chat.id, text: "The average mood is: #{avg}")
+        #   bot.api.send_message(chat_id: message.chat.id, text: "Total tracked moods: #{total_moods}")
+        #   bot.api.send_message(chat_id: message.chat.id, text: "Number of months tracked: #{number_of_months.round(1)}")
+        #   bot.api.send_message(chat_id: message.chat.id, text: "Averaging #{average_number_of_moods.round(1)} per day")
         when "/graph"
           file = Tempfile.new("graph")
           file_path = "#{file.path}.png"

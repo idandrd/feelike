@@ -5,15 +5,16 @@ require 'gruff'
 
 module Mood
   class TelegramHandler
+
     def self.send_question(message:)
       # See more: https://core.telegram.org/bots/api#replykeyboardmarkup
       answers =
         Telegram::Bot::Types::ReplyKeyboardMarkup.new(
           one_time_keyboard: false,
           keyboard: [
-            ["5: pumped, energized", "4: happy, excited"],
-            ["3: good, alright", "2: down, worried"],
-            ["1: Sad, unhappy", "0: Miserable, nervous"]
+            ["5: pumped, energized 🤩", "4: happy, excited 😁"],
+            ["3: good, alright 🙂", "2: down, worried 😕"],
+            ["1: Sad, unhappy ☹️", "0: Miserable, nervous 😫"]
           ]
         )
       self.perform_with_bot do |bot|
@@ -63,6 +64,15 @@ module Mood
     end
 
     def self.handle_input(bot, message)
+      answers =
+        Telegram::Bot::Types::ReplyKeyboardMarkup.new(
+          one_time_keyboard: false,
+          keyboard: [
+            ["5: pumped, energized 🤩", "4: happy, excited 😁"],
+            ["3: good, alright 🙂", "2: down, worried 😕"],
+            ["1: Sad, unhappy ☹️", "0: Miserable, nervous 😫"]
+          ]
+        )
       case message.text
         # when "/stats"
         #   avg = Mood::Database.database[:moods].where(:chat_id => message.chat.id).avg(:value).to_f.round(2)
@@ -75,6 +85,8 @@ module Mood
         #   bot.api.send_message(chat_id: message.chat.id, text: "Total tracked moods: #{total_moods}")
         #   bot.api.send_message(chat_id: message.chat.id, text: "Number of months tracked: #{number_of_months.round(1)}")
         #   bot.api.send_message(chat_id: message.chat.id, text: "Averaging #{average_number_of_moods.round(1)} per day")
+        when "/start"
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: answers, text: "🙋‍♂️ Welcome to feelike! 🙋‍♀️\nI will help you keep track of your mood.\nThree times a day I will ask you how do you feel at the moment.\nYou can use my special moods keyboard or just type in a 0-5 number (5 being the happiest).\nWhen you want to see your progress just send me '/graph' 🤓\n\n So let's give it a try! how do you feel like right now?")
         when "/graph"
           file = Tempfile.new("graph")
           file_path = "#{file.path}.png"
@@ -88,7 +100,6 @@ module Mood
           g.reference_lines[:maximum]  = { :value => 5, :color => "green" }
           # g.reference_lines[:horiz_one] = { :index => 1, :color => 'green' }
           labels_arr = moods.each_with_index.map { |m,i| [i, m[:time]] }
-          puts(labels_arr.to_h)
           g.labels = labels_arr.to_h
           g.data(:mood, moods.collect { |m| m[:value] })
           g.write(file_path)

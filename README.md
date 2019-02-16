@@ -26,18 +26,6 @@ You can always just text your bot a number, however, I know I'd forget it. That'
 
 It then pulls up this really nice, optimized keyboard in Telegram, with a short description of what each number means.
 
-If you forget to track a day, that's no big deal at all. The database is simple, it looks like this:
-
-```ruby
-@_db.create_table :moods d
-  primary_key :id
-  DateTime :time
-  Integer :value
-end
-```
-
-I decided not to store the information about breakfast, lunch and dinner, as it would make time zones more complex, as [I'm traveling quite a bit](https://whereisfelix.today).
-
 ## Graphs
 
 We're working on a nice visualization page & dashboard for this. Maybe even just send a weekly and monthly summary via Telegram?

@@ -86,7 +86,7 @@ module Mood
         #   bot.api.send_message(chat_id: message.chat.id, text: "Number of months tracked: #{number_of_months.round(1)}")
         #   bot.api.send_message(chat_id: message.chat.id, text: "Averaging #{average_number_of_moods.round(1)} per day")
         when "/start"
-          bot.api.send_message(chat_id: message.chat.id, reply_markup: answers, text: "🙋‍♂️ Welcome to feelike! 🙋‍♀️\nI will help you keep track of your mood.\nThree times a day I will ask you how do you feel at the moment.\nYou can use my special moods keyboard or just type in a 0-5 number (5 being the happiest).\nWhen you want to see your progress just send me '/graph' 🤓\n\n So let's give it a try! how do you feel like right now?")
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: answers, text: "🙋‍♂️ Welcome to feelike! 🙋‍♀️\nI will help you keep track of your mood.\nThree times a day I will ask you how do you feel at the moment.\nYou can use my special moods keyboard or just type in a 0-5 number (5 being the happiest).\nWhen you want to see your progress just send me '/graph' 🤓\n🦋\n So let's give it a try! how do you feel like right now?")
         when "/graph"
           file = Tempfile.new("graph")
           file_path = "#{file.path}.png"

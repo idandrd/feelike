@@ -1,4 +1,4 @@
-# feelike
+# feelike 🦋
 
 <img src="/assets/screenshot.png" width="300" align="right"/>
 

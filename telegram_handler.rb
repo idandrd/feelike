@@ -19,11 +19,15 @@ module Mood
         )
       self.perform_with_bot do |bot|
         for chat in Mood::Database.database[:chats].all
-          bot.api.send_message(
-            chat_id: chat[:chat_id],
-            text: message,
-            reply_markup: answers
-          )
+          begin
+            bot.api.send_message(
+              chat_id: chat[:chat_id],
+              text: message,
+              reply_markup: answers
+            )
+           rescue
+            # Do nothing
+          end
         end
       end
     end

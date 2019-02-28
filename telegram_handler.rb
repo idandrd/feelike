@@ -129,6 +129,17 @@ module Mood
         end
     end
 
+    def self.send_weekly_report
+      self.perform_with_bot do |bot|
+        for chat in Mood::Database.database[:chats].all
+          puts chat
+          moods = Mood::Database.database[:moods].where(:chat_id => chat[:chat_id])
+          labels_arr = moods.each_with_index.map { |m,i| [i, m[:time]] }
+          puts labels_arr
+        end
+      end
+    end
+
     def self.perform_with_bot
       # https://github.com/atipugin/telegram-bot-ruby
       yield self.client

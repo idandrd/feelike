@@ -129,13 +129,35 @@ module Mood
         end
     end
 
+    def self.get_last_week_moods(moods)
+      seconds_in_week = 60 * 60 * 24 * 7
+      last_week_time = Time.new - seconds_in_week
+      moods.select { |m| m[:time] > last_week_time}
+    end
+
+    def self.get_moods_avg(moods)
+      moods.inject(0.0) { |sum, el| sum + el[:value] } / moods.size
+    end
+
     def self.send_weekly_report
       self.perform_with_bot do |bot|
         for chat in Mood::Database.database[:chats].all
           puts chat
-          moods = Mood::Database.database[:moods].where(:chat_id => chat[:chat_id])
-          labels_arr = moods.each_with_index.map { |m,i| [i, m[:time]] }
-          puts labels_arr
+          dataset = Mood::Database.database[:moods].where(:chat_id => chat[:chat_id])
+          moods = dataset.collect { |m| {:time => m[:time], :value => m[:value]}}
+          last_week_moods = moods.select()
+          # timestamps_arr = moods.collect { |m| m[:time] }
+          # moods_values = moods.collect { |m| m[:value] }
+          # puts moods_values
+          # puts moods_values.inject{ |sum, el| sum + el }.to_f / moods_values.size
+          # puts timestamps_arr[0].year
+          # puts moods
+          # puts moods.class
+          last_week_moods = self.get_last_week_moods(moods)
+          puts "your last week mood average:"
+          puts self.get_moods_avg(last_week_moods)
+          puts "your total average:"
+          puts self.get_moods_avg(moods)
         end
       end
     end

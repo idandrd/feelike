@@ -9,3 +9,4 @@ gem "pry"
 gem "sinatra"
 gem "gruff" # sorry, but this requires ImageMagick :( Used for the graph
 #gem "sqlite3" # DEV ONLY
+gem "rack"

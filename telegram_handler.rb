@@ -32,6 +32,27 @@ module Mood
       end
     end
 
+    def self.send_message(message:)
+      success_count = 0
+      error_count = 0
+
+      self.perform_with_bot do |bot|
+        for chat in Mood::Database.database[:chats].all
+          begin
+            bot.api.send_message(
+              chat_id: chat[:chat_id],
+              text: message
+            )
+            success_count = success_count + 1
+           rescue
+            error_count = error_count + 1
+          end
+        end
+      end
+
+      return success_count, error_count
+    end
+
     def self.listen
       self.perform_with_bot do |bot|
         bot.listen do |message|

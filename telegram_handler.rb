@@ -56,33 +56,37 @@ module Mood
     def self.listen
       self.perform_with_bot do |bot|
         bot.listen do |message|
-          self.add_chat_id(message.chat.id)
+          begin
+            self.add_chat_id(message.chat.id)
 
-          if message.text.to_s.to_i > 0 || message.text.to_s.strip.start_with?("0")
-            # As 0 is also a valid value
-            rating = message.text.to_i
+            if message.text.to_s.to_i > 0 || message.text.to_s.strip.start_with?("0")
+              # As 0 is also a valid value
+              rating = message.text.to_i
 
-            if rating >= 0 && rating <= 5
-              Mood::Database.database[:moods].insert({
-                time: Time.at(message.date),
-                chat_id: message.chat.id,
-                value: rating
-              })
-              bot.api.send_message(chat_id: message.chat.id, text: "Got it! It's marked in the books 📚")
+              if rating >= 0 && rating <= 5
+                Mood::Database.database[:moods].insert({
+                  time: Time.at(message.date),
+                  chat_id: message.chat.id,
+                  value: rating
+                })
+                bot.api.send_message(chat_id: message.chat.id, text: "Got it! It's marked in the books 📚")
 
-              if rating <= 1
-                bot.api.send_message(chat_id: message.chat.id, text: "Feeling down sometimes is okay. Maybe take 2 minutes to reflect on why you're not feeling better, and optionally add a /note")
-                bot.api.send_message(chat_id: message.chat.id, text: "Sending hugs 🤗🤗🤗")
-              end
+                if rating <= 1
+                  bot.api.send_message(chat_id: message.chat.id, text: "Feeling down sometimes is okay. Maybe take 2 minutes to reflect on why you're not feeling better, and optionally add a /note")
+                  bot.api.send_message(chat_id: message.chat.id, text: "Sending hugs 🤗🤗🤗")
+                end
 
-              if rating == 5
-                bot.api.send_message(chat_id: message.chat.id, text: "💫 Awesome to hear, maybe take 2 minutes to reflect on why you're feeling great, and optionally add a /note")
+                if rating == 5
+                  bot.api.send_message(chat_id: message.chat.id, text: "💫 Awesome to hear, maybe take 2 minutes to reflect on why you're feeling great, and optionally add a /note")
+                end
+              else
+                bot.api.send_message(chat_id: message.chat.id, text: "Only values from 0 to 5 are allowed")
               end
             else
-              bot.api.send_message(chat_id: message.chat.id, text: "Only values from 0 to 5 are allowed")
+              self.handle_input(bot, message)
             end
-          else
-            self.handle_input(bot, message)
+          rescue
+            # Do nothing
           end
         end
       end

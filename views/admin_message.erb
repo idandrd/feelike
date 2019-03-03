@@ -1,0 +1,27 @@
+<title>Admin Announcement</title>
+<h1>Admin Announcement</h1>
+
+<form method="post">
+  <div>
+    <div>
+        <%= message if defined?(message) %>
+    </div>
+    <label for="message">Message:</label>
+    <textarea name="message"></textarea>
+  </div>
+  <button type="submit" class="btn">Send message to all users!</button>
+</form>
+
+<style>
+body {
+    width: 50%;
+    margin: 50px auto;
+    text-align: center;
+    font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+}
+
+textarea {
+    width: 100%;
+    height: 30vh;
+}
+</style>

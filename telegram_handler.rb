@@ -8,15 +8,17 @@ module Mood
 
     def self.send_question(message:)
       # See more: https://core.telegram.org/bots/api#replykeyboardmarkup
-      answers =
-        Telegram::Bot::Types::ReplyKeyboardMarkup.new(
-          one_time_keyboard: false,
-          keyboard: [
-            ["5: pumped, energized 🤩", "4: happy, excited 😁"],
-            ["3: good, alright 🙂", "2: down, worried 😕"],
-            ["1: Sad, unhappy ☹️", "0: Miserable, nervous 😫"]
-          ]
-        )
+
+      kb = [
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🤩', callback_data: '5'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy ☹️', callback_data: '1'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
+      ]
+      answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)       
+
       self.perform_with_bot do |bot|
         for chat in Mood::Database.database[:chats].all
           begin
@@ -93,15 +95,16 @@ module Mood
     end
 
     def self.handle_input(bot, message)
-      answers =
-        Telegram::Bot::Types::ReplyKeyboardMarkup.new(
-          one_time_keyboard: false,
-          keyboard: [
-            ["5: pumped, energized 🤩", "4: happy, excited 😁"],
-            ["3: good, alright 🙂", "2: down, worried 😕"],
-            ["1: Sad, unhappy ☹️", "0: Miserable, nervous 😫"]
-          ]
-        )
+      kb = [
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🤩', callback_data: '5'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy ☹️', callback_data: '1'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
+      ]
+      answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)     
+
       case message.text
         # when "/stats"
         #   avg = Mood::Database.database[:moods].where(:chat_id => message.chat.id).avg(:value).to_f.round(2)

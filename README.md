@@ -41,5 +41,5 @@ Super easy!
 
 That's it!
 
-We're exited to get your feedback so write to us!
+We're excited to get your feedback so write to us!
 Also, contributions are super welcome :)

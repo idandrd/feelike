@@ -3,25 +3,35 @@ require 'telegram/bot'
 require 'tempfile'
 require 'gruff'
 
+
 module Mood
+
   class TelegramHandler
 
-    def self.send_question(message:)
-      # See more: https://core.telegram.org/bots/api#replykeyboardmarkup
-
-      kb = [
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5', callback_data: '5'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4', callback_data: '4'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3', callback_data: '3'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2', callback_data: '2'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1', callback_data: '1'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0', callback_data: '0'),
+    #Inline keyboard default - see https://core.telegram.org/bots/api/#inlinekeyboardbutton
+    $kb = [
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🔥', callback_data: '5'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy 🙁', callback_data: '1'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
       ]
-      answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)       
+
+    def self.send_question(message:)
 
       self.perform_with_bot do |bot|
         for chat in Mood::Database.database[:chats].all
+          # use user's custom keyboard mood labels
+          kb=$kb;
+          Mood::Database.database[:moodlabels].where(:chat_id => message.chat.id).each do |n|
+            _mood = n[:mood].to_i
+            _label = n[:label].to_s
+            kb[5 - _mood] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{_mood}: #{_label}", callback_data: _mood)
+          end          
+          answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
           begin
+
             bot.api.send_message(
               chat_id: chat[:chat_id],
               text: message,
@@ -67,13 +77,6 @@ module Mood
             user_input = message.text
             this_chat_id = message.chat.id
           end
-
-#          begin
-#            self.add_chat_id(this_chat_id)
-#            bot.api.send_message(chat_id: message.from.id, text: "Received " + user_input.to_s)          
-#          rescue
-            #do nothing
-#          end
           
           begin
             if user_input.to_s.to_i > 0 || user_input.to_s.strip.start_with?("0")
@@ -109,51 +112,8 @@ module Mood
       end 
     end 
         
-  #        end
-#          when Telegram::Bot::Types::Message
- #           self.add_chat_id(message.chat.id)
-
- #           if message.text.to_s.to_i > 0 || message.text.to_s.strip.start_with?("0")
-              # As 0 is also a valid value
- #             rating = message.text.to_i
-
-  #            if rating >= 0 && rating <= 5
-  #              Mood::Database.database[:moods].insert({
-   #               time: Time.at(message.date),
-    #              chat_id: message.chat.id,
-     #             value: rating
-      #          })
-       #         bot.api.send_message(chat_id: message.chat.id, text: "Got it! It's marked in the books 📚")
-
-#                if rating <= 1
- #                 bot.api.send_message(chat_id: message.chat.id, text: "Feeling down sometimes is okay. Maybe take 2 minutes to reflect on why you're not feeling better, and optionally add a /note")
-  #                bot.api.send_message(chat_id: message.chat.id, text: "Sending hugs 🤗🤗🤗")
-   #             end
-#
- #               if rating == 5
-  #                bot.api.send_message(chat_id: message.chat.id, text: "💫 Awesome to hear, maybe take 2 minutes to reflect on why you're feeling great, and optionally add a /note")
-   #             end
-    #          else
-     #           bot.api.send_message(chat_id: message.chat.id, text: "Only values from 0 to 5 are allowed")
-      #        end
-       #     else
-        #      self.handle_input(bot, message)
-   #         end
-    #      end
-     #     rescue
-            # Do nothing
-  #        end
 
     def self.handle_input(bot, message)
-      kb = [
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🤩', callback_data: '5'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy ☹️', callback_data: '1'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
-      ]
-      answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)     
 
       case message.text
         # when "/stats"
@@ -168,7 +128,49 @@ module Mood
         #   bot.api.send_message(chat_id: message.chat.id, text: "Number of months tracked: #{number_of_months.round(1)}")
         #   bot.api.send_message(chat_id: message.chat.id, text: "Averaging #{average_number_of_moods.round(1)} per day")
         when "/start"
+          kb=$kb;
+          Mood::Database.database[:moodlabels].where(:chat_id => message.chat.id).each do |n|
+            _mood = n[:mood].to_i
+            _label = n[:label].to_s
+            kb[5 - _mood] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{_mood}: #{_label}", callback_data: _mood)
+          end          
+          answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+
           bot.api.send_message(chat_id: message.chat.id, reply_markup: answers, text: "🙋‍♂️ Welcome to feelike! 🙋‍♀️\nI will help you keep track of your mood.\nThree times a day I will ask you how do you feel at the moment.\nYou can use my special moods keyboard or just type in a 0-5 number (5 being the happiest).\nWhen you want to see your progress just send me '/graph'\n🦋\nSo let's give it a try! how do you feel like right now?")
+        when "/mood"  
+          kb=$kb;
+          Mood::Database.database[:moodlabels].where(:chat_id => message.chat.id).each do |n|
+            _mood = n[:mood].to_i
+            _label = n[:label].to_s
+            kb[5 - _mood] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{_mood}: #{_label}", callback_data: _mood)
+          end          
+          answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: answers, text: "How do you feel like? Share your mood")
+        when "/setlabel"
+          bot.api.send_message(chat_id: message.chat.id, text: "To set a mood's label use format: '/setlabel # Mood label'")
+        when /\/setlabel\ /
+          label_content = message.text.split("/setlabel ").last
+          label_mood = label_content[0]
+          label_text = label_content[2,label_content.length - 1]
+          
+          if (label_mood=="0" or label_mood=="1" or label_mood=="2" or label_mood=="3" or label_mood=="4" or label_mood=="5")
+            Mood::Database.database[:moodlabels].replace({
+              chat_id: message.chat.id,
+              mood: label_mood,
+              label: label_text
+            })
+          kb=$kb;
+          Mood::Database.database[:moodlabels].where(:chat_id => message.chat.id).each do |n|
+            _mood = n[:mood].to_i
+            _label = n[:label].to_s
+            kb[5 - _mood] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{_mood}: #{_label}", callback_data: _mood)
+          end          
+          answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: answers, text: "Mood label set!")
+
+          else
+           bot.api.send_message(chat_id: message.chat.id, text: "Mood number must be between 0 and 5. Use the format '/setlabel # Mood label'")
+          end 
         when "/graph"
           file = Tempfile.new("graph")
           file_path = "#{file.path}.png"

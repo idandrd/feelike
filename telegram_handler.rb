@@ -10,12 +10,12 @@ module Mood
       # See more: https://core.telegram.org/bots/api#replykeyboardmarkup
 
       kb = [
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🤩', callback_data: '5'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy ☹️', callback_data: '1'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5', callback_data: '5'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4', callback_data: '4'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3', callback_data: '3'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2', callback_data: '2'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1', callback_data: '1'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0', callback_data: '0'),
       ]
       answers = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)       
 
@@ -55,44 +55,94 @@ module Mood
       return success_count, error_count
     end
 
+
     def self.listen
       self.perform_with_bot do |bot|
         bot.listen do |message|
-          begin
-            self.add_chat_id(message.chat.id)
+          case message
+          when Telegram::Bot::Types::CallbackQuery
+            user_input = message.data
+            this_chat_id = message.from.id
+          when Telegram::Bot::Types::Message  
+            user_input = message.text
+            this_chat_id = message.chat.id
+          end
 
-            if message.text.to_s.to_i > 0 || message.text.to_s.strip.start_with?("0")
+#          begin
+#            self.add_chat_id(this_chat_id)
+#            bot.api.send_message(chat_id: message.from.id, text: "Received " + user_input.to_s)          
+#          rescue
+            #do nothing
+#          end
+          
+          begin
+            if user_input.to_s.to_i > 0 || user_input.to_s.strip.start_with?("0")
               # As 0 is also a valid value
-              rating = message.text.to_i
+              rating = user_input.to_i
 
               if rating >= 0 && rating <= 5
                 Mood::Database.database[:moods].insert({
-                  time: Time.at(message.date),
-                  chat_id: message.chat.id,
+                  time: Time.now,
+                  chat_id: this_chat_id,
                   value: rating
                 })
-                bot.api.send_message(chat_id: message.chat.id, text: "Got it! It's marked in the books 📚")
+                bot.api.send_message(chat_id: this_chat_id, text: "Got it! ("+rating.to_s+") It's marked in the books 📚")
 
                 if rating <= 1
-                  bot.api.send_message(chat_id: message.chat.id, text: "Feeling down sometimes is okay. Maybe take 2 minutes to reflect on why you're not feeling better, and optionally add a /note")
-                  bot.api.send_message(chat_id: message.chat.id, text: "Sending hugs 🤗🤗🤗")
+                  bot.api.send_message(chat_id: this_chat_id, text: "Feeling down sometimes is okay. Maybe take 2 minutes to reflect on why you're not feeling better, and optionally add a /note")
+                  bot.api.send_message(chat_id: this_chat_id, text: "Sending hugs 🤗🤗🤗")
                 end
 
                 if rating == 5
-                  bot.api.send_message(chat_id: message.chat.id, text: "💫 Awesome to hear, maybe take 2 minutes to reflect on why you're feeling great, and optionally add a /note")
+                  bot.api.send_message(chat_id: this_chat_id, text: "💫 Awesome to hear, maybe take 2 minutes to reflect on why you're feeling great, and optionally add a /note")
                 end
               else
-                bot.api.send_message(chat_id: message.chat.id, text: "Only values from 0 to 5 are allowed")
+                bot.api.send_message(chat_id: this_chat_id, text: "Only values from 0 to 5 are allowed")
               end
             else
               self.handle_input(bot, message)
-            end
-          rescue
+            end          
+          #rescue
             # Do nothing
           end
         end
-      end
-    end
+      end 
+    end 
+        
+  #        end
+#          when Telegram::Bot::Types::Message
+ #           self.add_chat_id(message.chat.id)
+
+ #           if message.text.to_s.to_i > 0 || message.text.to_s.strip.start_with?("0")
+              # As 0 is also a valid value
+ #             rating = message.text.to_i
+
+  #            if rating >= 0 && rating <= 5
+  #              Mood::Database.database[:moods].insert({
+   #               time: Time.at(message.date),
+    #              chat_id: message.chat.id,
+     #             value: rating
+      #          })
+       #         bot.api.send_message(chat_id: message.chat.id, text: "Got it! It's marked in the books 📚")
+
+#                if rating <= 1
+ #                 bot.api.send_message(chat_id: message.chat.id, text: "Feeling down sometimes is okay. Maybe take 2 minutes to reflect on why you're not feeling better, and optionally add a /note")
+  #                bot.api.send_message(chat_id: message.chat.id, text: "Sending hugs 🤗🤗🤗")
+   #             end
+#
+ #               if rating == 5
+  #                bot.api.send_message(chat_id: message.chat.id, text: "💫 Awesome to hear, maybe take 2 minutes to reflect on why you're feeling great, and optionally add a /note")
+   #             end
+    #          else
+     #           bot.api.send_message(chat_id: message.chat.id, text: "Only values from 0 to 5 are allowed")
+      #        end
+       #     else
+        #      self.handle_input(bot, message)
+   #         end
+    #      end
+     #     rescue
+            # Do nothing
+  #        end
 
     def self.handle_input(bot, message)
       kb = [

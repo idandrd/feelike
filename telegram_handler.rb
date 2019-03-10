@@ -8,7 +8,7 @@ module Mood
 
   class TelegramHandler
 
-    def self.customMoodsKeyboard(_chatid)
+    def self.customMoodsKeyboard(chatid)
 
     #Inline keyboard default - see https://core.telegram.org/bots/api/#inlinekeyboardbutton
     kb = [
@@ -20,7 +20,7 @@ module Mood
         Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
       ]
 
-      Mood::Database.database[:moodlabels].where(:chat_id => _chatid).each do |n|
+      Mood::Database.database[:moodlabels].where(:chat_id => chatid).each do |n|
         mood = n[:mood].to_i
         label = n[:label].to_s
         kb[5 - mood] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{mood}: #{label}", callback_data: mood)

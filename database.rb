@@ -30,6 +30,16 @@ module Mood
         end
       end
 
+      unless @_db.table_exists?("moodlabels")
+        @_db.create_table :moodlabels do
+          primary_key :id
+          Integer :chat_id
+          Integer :mood
+          String :label
+          unique [:chat_id, :mood]
+        end
+      end
+
       return @_db
     end
   end

@@ -8,7 +8,7 @@ module Mood
 
   class TelegramHandler
 
-    def self.customMoodsKeyboard(chatid)
+    def self.custom_moods_keyboard(chatid)
 
     #Inline keyboard default - see https://core.telegram.org/bots/api/#inlinekeyboardbutton
     kb = [
@@ -38,7 +38,7 @@ module Mood
               bot.api.send_message(
               chat_id: this_chatid,
               text: message,
-              reply_markup: self.customMoodsKeyboard(this_chatid)
+              reply_markup: self.custom_moods_keyboard(this_chatid)
             )
            rescue
             # Do nothing
@@ -132,9 +132,9 @@ module Mood
         #   bot.api.send_message(chat_id: message.chat.id, text: "Number of months tracked: #{number_of_months.round(1)}")
         #   bot.api.send_message(chat_id: message.chat.id, text: "Averaging #{average_number_of_moods.round(1)} per day")
         when "/start"
-          bot.api.send_message(chat_id: message.chat.id, reply_markup: self.customMoodsKeyboard(message.chat.id), text: "🙋‍♂️ Welcome to feelike! 🙋‍♀️\nI will help you keep track of your mood.\nThree times a day I will ask you how do you feel at the moment.\nYou can use my special moods keyboard or just type in a 0-5 number (5 being the happiest).\nWhen you want to see your progress just send me '/graph'\nIf you'd lke to customize your mood options send '/setlabel'\n🦋\nSo let's give it a try! how do you feel like right now?")
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: self.custom_moods_keyboard(message.chat.id), text: "🙋‍♂️ Welcome to feelike! 🙋‍♀️\nI will help you keep track of your mood.\nThree times a day I will ask you how do you feel at the moment.\nYou can use my special moods keyboard or just type in a 0-5 number (5 being the happiest).\nWhen you want to see your progress just send me '/graph'\nIf you'd lke to customize your mood options send '/setlabel'\n🦋\nSo let's give it a try! how do you feel like right now?")
         when "/mood"  
-          bot.api.send_message(chat_id: message.chat.id, reply_markup: self.customMoodsKeyboard(message.chat.id), text: "How do you feel like? Share your mood")
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: self.custom_moods_keyboard(message.chat.id), text: "How do you feel like? Share your mood")
         when "/setlabel"
           bot.api.send_message(chat_id: message.chat.id, text: "To set a mood's label use format: '/setlabel # Mood label'\nFor example '/setlabel 5 I'm on fire!! 🔥'")
         when /\/setlabel\ /
@@ -149,7 +149,7 @@ module Mood
               label: label_text
             })
 
-          bot.api.send_message(chat_id: message.chat.id, reply_markup: self.customMoodsKeyboard(message.chat.id), text: "Mood label set!")
+          bot.api.send_message(chat_id: message.chat.id, reply_markup: self.custom_moods_keyboard(message.chat.id), text: "Mood label set!")
           else
            bot.api.send_message(chat_id: message.chat.id, text: "Mood number must be between 0 and 5. Use the format '/setlabel # Mood label'")
           end 

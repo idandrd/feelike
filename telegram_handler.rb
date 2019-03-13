@@ -77,6 +77,11 @@ module Mood
           when Telegram::Bot::Types::CallbackQuery
             user_input = message.data
             this_chat_id = message.from.id
+            
+            bot.api.answerCallbackQuery({
+              'callback_query_id' =>  message.id
+            });
+
           when Telegram::Bot::Types::Message  
             user_input = message.text
             this_chat_id = message.chat.id

@@ -12,18 +12,19 @@ module Mood
 
     #Inline keyboard default - see https://core.telegram.org/bots/api/#inlinekeyboardbutton
     kb = [
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🔥', callback_data: '5'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy 🙁', callback_data: '1'),
-        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0'),
+        [Telegram::Bot::Types::InlineKeyboardButton.new(text: '5: pumped, energized 🔥', callback_data: '5'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '4: happy, excited 😁', callback_data: '4')],
+        [Telegram::Bot::Types::InlineKeyboardButton.new(text: '3: good, alright 🙂', callback_data: '3'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '2: down, worried 😕', callback_data: '2')],
+        [Telegram::Bot::Types::InlineKeyboardButton.new(text: '1: Sad, unhappy 🙁', callback_data: '1'),
+        Telegram::Bot::Types::InlineKeyboardButton.new(text: '0: Miserable, nervous 😫', callback_data: '0')],
       ]
 
       Mood::Database.database[:moodlabels].where(:chat_id => chatid).each do |n|
         mood = n[:mood].to_i
         label = n[:label].to_s
-        kb[5 - mood] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{mood}: #{label}", callback_data: mood)
+
+        kb[((5 - mood)/2).to_i][(mood+1) % 2 ] = Telegram::Bot::Types::InlineKeyboardButton.new(text:"#{mood}: #{label}", callback_data: mood)
       end          
 
       return Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: kb)
@@ -77,10 +78,30 @@ module Mood
           when Telegram::Bot::Types::CallbackQuery
             user_input = message.data
             this_chat_id = message.from.id
-            
+
             bot.api.answerCallbackQuery({
               'callback_query_id' =>  message.id
             });
+
+#!
+=begin
+            _kb = [
+              Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Mood submitted'),
+            ]
+
+            _ans = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: _kb)
+
+            bot.api.editMessageReplyMarkup({
+              'chat_id' =>  message.from.id,
+              'message_id' =>  message.message.message_id,
+              'reply_markup' => _ans
+            });
+=end
+            bot.api.deleteMessage({
+              'chat_id' =>  message.from.id,
+              'message_id' =>  message.message.message_id
+            });
+
 
           when Telegram::Bot::Types::Message  
             user_input = message.text

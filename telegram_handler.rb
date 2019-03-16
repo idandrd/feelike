@@ -83,20 +83,6 @@ module Mood
               'callback_query_id' =>  message.id
             });
 
-#!
-=begin
-            _kb = [
-              Telegram::Bot::Types::InlineKeyboardButton.new(text: 'Mood submitted'),
-            ]
-
-            _ans = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: _kb)
-
-            bot.api.editMessageReplyMarkup({
-              'chat_id' =>  message.from.id,
-              'message_id' =>  message.message.message_id,
-              'reply_markup' => _ans
-            });
-=end
             bot.api.deleteMessage({
               'chat_id' =>  message.from.id,
               'message_id' =>  message.message.message_id
@@ -169,7 +155,11 @@ module Mood
           label_text = label_content[2,label_content.length - 1]
           
           if (label_mood=="0" or label_mood=="1" or label_mood=="2" or label_mood=="3" or label_mood=="4" or label_mood=="5")
-            Mood::Database.database[:moodlabels].replace({
+            
+            previous_label = Mood::Database.database[:moodlabels].where(:chat_id => message.chat.id, :mood => label_mood)
+            previous_label.delete
+            
+            Mood::Database.database[:moodlabels].insert({
               chat_id: message.chat.id,
               mood: label_mood,
               label: label_text

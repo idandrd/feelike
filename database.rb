@@ -36,7 +36,6 @@ module Mood
           Integer :chat_id
           Integer :mood
           String :label
-          unique [:chat_id, :mood]
         end
       end
 

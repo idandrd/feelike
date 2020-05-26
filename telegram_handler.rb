@@ -41,8 +41,10 @@ module Mood
               text: message,
               reply_markup: self.custom_moods_keyboard(this_chatid)
             )
-           rescue
-            # Do nothing
+           rescue => ex
+             puts "error sending the mood question"
+             puts chat_id
+             puts ex
           end
         end
       end
